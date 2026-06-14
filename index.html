@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מרכז המשפחה</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f5f0;color:#1a1a1a;padding:20px;max-width:800px;margin:0 auto}
+h1{font-size:22px;font-weight:500;margin-bottom:1.5rem;color:#1a1a1a}
+.tabs{display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:7px 16px;border-radius:20px;border:1px solid #ccc;background:#fff;color:#666;font-size:13px;cursor:pointer;transition:all .15s}
+.tab-btn.active{background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;font-weight:500}
+.section{display:none}.section.active{display:block}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:1rem 1.25rem;margin-bottom:10px}
+.sec-title{font-size:16px;font-weight:500;margin-bottom:1rem}
+.badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:10px;margin-right:4px;margin-bottom:2px}
+.bp{background:#EEEDFE;color:#3C3489}.bt{background:#E1F5EE;color:#085041}.ba{background:#FAEEDA;color:#633806}.bc{background:#FAECE7;color:#712B13}.bg2{background:#EAF3DE;color:#27500A}
+input[type=text],textarea,select{width:100%;border:1px solid #ccc;border-radius:8px;padding:8px 12px;font-size:14px;font-family:Arial,sans-serif;background:#fff;color:#1a1a1a;margin-bottom:8px}
+.lbl{font-size:12px;color:#666;margin-bottom:3px;display:block}
+.btn{background:#EEEDFE;color:#3C3489;border:1px solid #AFA9EC;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn:hover{background:#CECBF6}
+.btn-sm{background:#f5f5f0;color:#666;border:1px solid #ddd;border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer}
+.btn-danger{background:#FCEBEB;color:#A32D2D;border:1px solid #F09595;border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer}
+.big-btn{width:100%;padding:13px;font-size:15px;font-weight:500;background:#EEEDFE;color:#3C3489;border:1px solid #AFA9EC;border-radius:12px;cursor:pointer;margin-bottom:1rem}
+.big-btn:hover{background:#CECBF6}
+.result-box{background:#f5f5f0;border-radius:12px;padding:1.25rem;font-size:14px;line-height:1.7;margin-bottom:1rem;white-space:pre-wrap}
+.ai-loading{color:#888;font-size:13px;padding:1rem;text-align:center}
+.stars-row{display:flex;gap:3px;margin-bottom:8px}
+.star{font-size:20px;cursor:pointer;background:none;border:none;color:#ccc;transition:color .1s}
+.star.lit{color:#EF9F27}
+.tag-chip{display:inline-block;font-size:12px;padding:3px 10px;border-radius:12px;background:#f0f0f0;color:#555;margin:2px;cursor:pointer;border:1px solid #e0e0e0;transition:all .15s}
+.tag-chip.sel{background:#E1F5EE;color:#085041;border-color:#5DCAA5}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.divider{height:1px;background:#e5e5e5;margin:12px 0}
+.empty{text-align:center;padding:2rem;color:#888;font-size:14px}
+.ingredient-tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:4px 10px;border-radius:12px;background:#f0f0f0;border:1px solid #e0e0e0;margin:2px;color:#1a1a1a}
+.ingredient-tag button{background:none;border:none;cursor:pointer;color:#888;font-size:14px;line-height:1;padding:0}
+.spoil-soon{background:#FAEEDA;border-color:#FAC775;color:#633806}
+.activity-card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:1rem;margin-bottom:8px}
+
+/* API KEY BANNER */
+.api-banner{background:#FFF8E7;border:1px solid #FAC775;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:14px;line-height:1.6}
+.api-banner a{color:#854F0B;font-weight:500}
+.api-input-row{display:flex;gap:8px;margin-top:8px}
+.api-input-row input{margin-bottom:0;flex:1}
+</style>
+</head>
+<body dir="rtl">
+
+<h1>מרכז המשפחה החכם</h1>
+
+<div class="api-banner" id="api-banner">
+  <strong>הגדרה חד-פעמית — API Key</strong><br>
+  כדי שהשף החכם יעבוד, צריך מפתח חינמי מ-Groq (ללא כרטיס אשראי!).<br>
+  1. היכנסי ל <a href="https://console.groq.com" target="_blank">console.groq.com</a> ← הירשמי (Google/GitHub)<br>
+  2. לחצי על "API Keys" ← צרי מפתח חדש<br>
+  3. הדביקי אותו כאן:
+  <div class="api-input-row">
+    <input type="text" id="api-key-input" placeholder="gsk_..." style="font-family:monospace">
+    <button class="btn" onclick="saveKey()">שמור</button>
+  </div>
+  <div id="key-status" style="font-size:12px;color:#666;margin-top:6px"></div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="go('recipes')">ספר מתכונים</button>
+  <button class="tab-btn" onclick="go('chef')">שף חכם</button>
+  <button class="tab-btn" onclick="go('activities')">פעילויות</button>
+  <button class="tab-btn" onclick="go('evening')">ערב משפחתי</button>
+  <button class="tab-btn" onclick="go('week')">לוח שבועי</button>
+</div>
+
+<!-- RECIPES -->
+<div id="tab-recipes" class="section active">
+  <div class="sec-title">ספר המתכונים המשפחתי</div>
+  <div id="rf-toggle"><button class="btn" style="margin-bottom:1rem" onclick="openRecipeForm()">+ מתכון חדש</button></div>
+  <div id="rf" style="display:none;background:#f5f5f0;border-radius:12px;padding:1.25rem;margin-bottom:1rem">
+    <input type="hidden" id="rf-edit-id">
+    <label class="lbl">שם המתכון</label>
+    <input type="text" id="rf-name" placeholder="עוגת שוקולד של סבתא">
+    <label class="lbl">קטגוריה</label>
+    <select id="rf-cat"><option>אפייה</option><option>ארוחה ראשית</option><option>קינוח</option><option>ארוחת בוקר</option><option>מרק</option><option>סלט</option><option>חטיף</option></select>
+    <label class="lbl">רמת חריפות</label>
+    <select id="rf-spice"><option value="0">ללא</option><option value="1">קלה</option><option value="2">בינונית</option><option value="3">חריף</option></select>
+    <label class="lbl">פרופיל טעם</label>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px" id="flavor-chips">
+      <span class="tag-chip" onclick="this.classList.toggle('sel')">מתוק</span>
+      <span class="tag-chip" onclick="this.classList.toggle('sel')">מלוח</span>
+      <span class="tag-chip" onclick="this.classList.toggle('sel')">חמוץ</span>
+      <span class="tag-chip" onclick="this.classList.toggle('sel')">אומאמי</span>
+      <span class="tag-chip" onclick="this.classList.toggle('sel')">מריר</span>
+      <span class="tag-chip" onclick="this.classList.toggle('sel')">מתוק-חריף</span>
+    </div>
+    <label class="lbl">מרכיבים</label>
+    <input type="text" id="rf-ing" placeholder="קמח, שוקולד, ביצים, חמאה">
+    <label class="lbl">הוראות הכנה</label>
+    <textarea id="rf-steps" rows="3" placeholder="1. מחממים תנור... 2. מערבבים..."></textarea>
+    <label class="lbl">הערות / טיפים</label>
+    <input type="text" id="rf-notes" placeholder="מה הופך אותו למיוחד?">
+    <label class="lbl" style="margin-bottom:6px">דירוג הילדים</label>
+    <div class="stars-row" id="rf-stars">
+      <button class="star" onclick="setStars(1)">★</button><button class="star" onclick="setStars(2)">★</button><button class="star" onclick="setStars(3)">★</button><button class="star" onclick="setStars(4)">★</button><button class="star" onclick="setStars(5)">★</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn" onclick="saveRecipe()">שמור</button>
+      <button class="btn-sm" onclick="cancelRecipeForm()">ביטול</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem" id="rcat-filters">
+    <span class="tag-chip sel" onclick="setRFilter(this,'all')">הכל</span>
+    <span class="tag-chip" onclick="setRFilter(this,'אפייה')">אפייה</span>
+    <span class="tag-chip" onclick="setRFilter(this,'ארוחה ראשית')">ארוחה ראשית</span>
+    <span class="tag-chip" onclick="setRFilter(this,'קינוח')">קינוח</span>
+    <span class="tag-chip" onclick="setRFilter(this,'ארוחת בוקר')">ארוחת בוקר</span>
+  </div>
+  <div id="recipes-list"></div>
+</div>
+
+<!-- CHEF -->
+<div id="tab-chef" class="section">
+  <div class="sec-title">שף חכם — מה יש לי בבית?</div>
+  <label class="lbl">הוסף מרכיב (Enter)</label>
+  <input type="text" id="ing-input" placeholder="עגבניות, גבינה, ביצים..." onkeydown="if(event.key==='Enter')addIng()">
+  <div style="margin-bottom:12px" id="ings-display"></div>
+  <label class="lbl">סמן מרכיבים שעומדים להיפסד</label>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px" id="spoil-display"></div>
+  <label class="lbl">סוג ארוחה</label>
+  <select id="meal-type"><option>ארוחת ערב</option><option>ארוחת צהריים</option><option>ארוחת בוקר</option><option>קינוח</option><option>חטיף מהיר</option></select>
+  <label class="lbl">העדפות טעם</label>
+  <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px" id="meal-flavors">
+    <span class="tag-chip" onclick="this.classList.toggle('sel')">מתוק</span>
+    <span class="tag-chip" onclick="this.classList.toggle('sel')">מלוח</span>
+    <span class="tag-chip" onclick="this.classList.toggle('sel')">חמוץ</span>
+    <span class="tag-chip" onclick="this.classList.toggle('sel')">חריף</span>
+    <span class="tag-chip" onclick="this.classList.toggle('sel')">קל וקריספי</span>
+    <span class="tag-chip" onclick="this.classList.toggle('sel')">נוחות food</span>
+  </div>
+  <label class="lbl">רמת מורכבות</label>
+  <select id="complexity"><option>פשוט (עד 30 דק)</option><option>בינוני (עד שעה)</option><option>מורכב (שעה+)</option></select>
+  <button class="big-btn" style="margin-top:12px" onclick="askChef()">קבל הצעות מהשף החכם</button>
+  <div id="chef-result"></div>
+</div>
+
+<!-- ACTIVITIES -->
+<div id="tab-activities" class="section">
+  <div class="sec-title">פעילויות לילדים — ללא מסך</div>
+  <label class="lbl">חומרים זמינים (Enter)</label>
+  <input type="text" id="act-ing-input" placeholder="קרטון, צבעים, קמח..." onkeydown="if(event.key==='Enter')addActIng()">
+  <div style="margin-bottom:10px" id="act-ings-display"></div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+    <div style="flex:1;min-width:120px"><label class="lbl">גיל</label><select id="act-age"><option value="all">כל הגילאים</option><option value="2-4">2–4</option><option value="4-7">4–7</option><option value="7+">7+</option></select></div>
+    <div style="flex:1;min-width:120px"><label class="lbl">זמן פנוי</label><select id="act-time"><option>15 דקות</option><option>חצי שעה</option><option>שעה</option><option>יום שלם</option></select></div>
+    <div style="flex:1;min-width:120px"><label class="lbl">רמת בלאגן</label><select id="act-mess"><option>נקי</option><option>קצת בלאגן</option><option>הכל הולך</option></select></div>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem" id="act-cat-filters">
+    <span class="tag-chip sel" onclick="setActCat(this,'all')">הכל</span>
+    <span class="tag-chip" onclick="setActCat(this,'יצירה')">יצירה</span>
+    <span class="tag-chip" onclick="setActCat(this,'בישול')">בישול ביחד</span>
+    <span class="tag-chip" onclick="setActCat(this,'משחק')">משחק</span>
+    <span class="tag-chip" onclick="setActCat(this,'בחוץ')">בחוץ</span>
+  </div>
+  <button class="big-btn" onclick="askActivities()">הצע פעילויות לפי מה שיש לי</button>
+  <div id="act-result"></div>
+  <div class="divider"></div>
+  <div id="act-static-list" class="grid2"></div>
+</div>
+
+<!-- EVENING -->
+<div id="tab-evening" class="section">
+  <div class="sec-title">מחולל ערב משפחתי</div>
+  <label class="lbl">חומרים לבישול / אפייה</label>
+  <input type="text" id="ev-ings" placeholder="ביצים, קמח, גבינה...">
+  <label class="lbl">גילאי הילדים</label>
+  <input type="text" id="ev-ages" placeholder="למשל: 4, 7, 10">
+  <label class="lbl">כמה זמן יש?</label>
+  <select id="ev-time" style="margin-bottom:12px"><option>שעה</option><option>שעתיים</option><option>ערב שלם</option></select>
+  <button class="big-btn" onclick="askEvening()">צור תוכנית ערב מושלמת</button>
+  <div id="evening-result"></div>
+</div>
+
+<!-- WEEK -->
+<div id="tab-week" class="section">
+  <div class="sec-title">לוח פעילויות שבועי</div>
+  <label class="lbl">גיל הילדים</label>
+  <select id="wk-age" style="margin-bottom:8px"><option value="2-4">2–4</option><option value="4-7" selected>4–7</option><option value="7+">7+</option></select>
+  <label class="lbl">חומרים שיש בבית (אופציונלי)</label>
+  <input type="text" id="wk-ings" placeholder="קרטון, פלסטלינה, קמח..." style="margin-bottom:12px">
+  <button class="big-btn" onclick="askWeek()">צור לוח שבועי מותאם אישית</button>
+  <div id="week-result"></div>
+</div>
+
+<script>
+let recipes=[], rFilter='all', rStars=0, actCat='all', actIngsList=[], ings=[];
+
+function getKey(){return localStorage.getItem('anthropic_key')||''}
+function saveKey(){
+  const k=document.getElementById('api-key-input').value.trim();
+  if(!k){document.getElementById('key-status').textContent='הכניסי מפתח תחילה';return}
+  localStorage.setItem('anthropic_key',k);
+  document.getElementById('key-status').textContent='נשמר בהצלחה!';
+  document.getElementById('api-banner').style.background='#EAF3DE';
+  document.getElementById('api-banner').style.borderColor='#97C459';
+}
+
+window.onload=function(){
+  const k=getKey();
+  if(k){
+    document.getElementById('api-key-input').value=k;
+    document.getElementById('key-status').textContent='מפתח שמור';
+    document.getElementById('api-banner').style.background='#EAF3DE';
+    document.getElementById('api-banner').style.borderColor='#97C459';
+  }
+  loadRecipes();
+  renderRecipes();
+  renderStaticActivities();
+}
+
+function go(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function setStars(n){rStars=n;document.querySelectorAll('#rf-stars .star').forEach((b,i)=>b.classList.toggle('lit',i<n))}
+
+function openRecipeForm(){document.getElementById('rf').style.display='block';document.getElementById('rf-toggle').style.display='none'}
+function cancelRecipeForm(){
+  document.getElementById('rf').style.display='none';
+  document.getElementById('rf-toggle').style.display='block';
+  document.getElementById('rf-edit-id').value='';
+  ['rf-name','rf-ing','rf-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('rf-steps').value='';
+  rStars=0;
+  document.querySelectorAll('#rf-stars .star').forEach(s=>s.classList.remove('lit'));
+  document.querySelectorAll('#flavor-chips .tag-chip').forEach(s=>s.classList.remove('sel'));
+}
+
+function saveRecipe(){
+  const name=document.getElementById('rf-name').value.trim();
+  if(!name)return;
+  const editId=document.getElementById('rf-edit-id').value;
+  const rec={id:editId||Date.now().toString(),name,cat:document.getElementById('rf-cat').value,spice:document.getElementById('rf-spice').value,flavors:Array.from(document.querySelectorAll('#flavor-chips .sel')).map(e=>e.textContent),ing:document.getElementById('rf-ing').value,steps:document.getElementById('rf-steps').value,notes:document.getElementById('rf-notes').value,stars:rStars};
+  if(editId){const idx=recipes.findIndex(r=>r.id===editId);if(idx>-1)recipes[idx]=rec;else recipes.push(rec);}else{recipes.push(rec);}
+  localStorage.setItem('family_recipes',JSON.stringify(recipes));
+  cancelRecipeForm();renderRecipes();
+}
+
+function loadRecipes(){try{recipes=JSON.parse(localStorage.getItem('family_recipes')||'[]')}catch(e){recipes=[]}}
+
+function editRecipe(id){
+  const r=recipes.find(x=>x.id===id);if(!r)return;
+  document.getElementById('rf-edit-id').value=r.id;
+  document.getElementById('rf-name').value=r.name;
+  document.getElementById('rf-cat').value=r.cat;
+  document.getElementById('rf-spice').value=r.spice||'0';
+  document.getElementById('rf-ing').value=r.ing;
+  document.getElementById('rf-steps').value=r.steps||'';
+  document.getElementById('rf-notes').value=r.notes;
+  (r.flavors||[]).forEach(f=>{document.querySelectorAll('#flavor-chips .tag-chip').forEach(el=>{if(el.textContent===f)el.classList.add('sel')})});
+  rStars=r.stars;
+  document.querySelectorAll('#rf-stars .star').forEach((b,i)=>b.classList.toggle('lit',i<rStars));
+  openRecipeForm();
+}
+
+function deleteRecipe(id){if(confirm('למחוק מתכון זה?')){recipes=recipes.filter(r=>r.id!==id);localStorage.setItem('family_recipes',JSON.stringify(recipes));renderRecipes()}}
+
+function setRFilter(btn,cat){rFilter=cat;document.querySelectorAll('#rcat-filters .tag-chip').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');renderRecipes()}
+
+function renderRecipes(){
+  const list=document.getElementById('recipes-list');
+  const filtered=rFilter==='all'?recipes:recipes.filter(r=>r.cat===rFilter);
+  if(!filtered.length){list.innerHTML='<div class="empty">עוד אין מתכונים — הוסיפי את הראשון!</div>';return}
+  const spiceLabels=['','🌶 קלה','🌶🌶 בינונית','🌶🌶🌶 חריף'];
+  list.innerHTML=filtered.map(r=>`
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div style="font-size:15px;font-weight:500">${r.name}</div>
+        <div style="color:#EF9F27;font-size:13px">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+      </div>
+      <div style="margin-bottom:6px">
+        <span class="badge bp">${r.cat}</span>
+        ${r.spice>0?`<span class="badge ba">${spiceLabels[r.spice]}</span>`:''}
+        ${(r.flavors||[]).map(f=>`<span class="badge bt">${f}</span>`).join('')}
+      </div>
+      ${r.ing?`<div style="font-size:12px;color:#666;margin-bottom:4px">${r.ing}</div>`:''}
+      ${r.steps?`<div style="font-size:12px;margin-bottom:4px;line-height:1.5">${r.steps.substring(0,150)}${r.steps.length>150?'...':''}</div>`:''}
+      ${r.notes?`<div style="font-size:12px;color:#666;font-style:italic">"${r.notes}"</div>`:''}
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn-sm" onclick="editRecipe('${r.id}')">ערוך</button>
+        <button class="btn-danger" onclick="deleteRecipe('${r.id}')">מחק</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addIng(){
+  const inp=document.getElementById('ing-input');
+  inp.value.trim().split(/[,،]+/).forEach(r=>{const t=r.trim();if(t&&!ings.find(i=>i.name===t))ings.push({name:t,spoil:false})});
+  inp.value='';renderIngs();
+}
+function toggleSpoil(name){const i=ings.find(x=>x.name===name);if(i)i.spoil=!i.spoil;renderIngs()}
+function removeIng(name){ings=ings.filter(i=>i.name!==name);renderIngs()}
+function renderIngs(){
+  document.getElementById('ings-display').innerHTML=ings.map(i=>`<span class="ingredient-tag ${i.spoil?'spoil-soon':''}">${i.name}<button onclick="removeIng('${i.name}')">×</button></span>`).join('');
+  document.getElementById('spoil-display').innerHTML=ings.map(i=>`<span class="tag-chip ${i.spoil?'sel':''}" onclick="toggleSpoil('${i.name}')">${i.spoil?'⚠ ':''}${i.name}</span>`).join('');
+}
+
+function addActIng(){
+  const inp=document.getElementById('act-ing-input');
+  inp.value.trim().split(/[,،]+/).forEach(r=>{const t=r.trim();if(t&&!actIngsList.includes(t))actIngsList.push(t)});
+  inp.value='';renderActIngs();
+}
+function removeActIng(i){actIngsList.splice(i,1);renderActIngs()}
+function renderActIngs(){document.getElementById('act-ings-display').innerHTML=actIngsList.map((x,i)=>`<span class="ingredient-tag">${x}<button onclick="removeActIng(${i})">×</button></span>`).join('')}
+
+function setActCat(el,cat){actCat=cat;document.querySelectorAll('#act-cat-filters .tag-chip').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');renderStaticActivities()}
+
+async function callAI(prompt){
+  const key=getKey();
+  if(!key){alert('צריך להזין API Key תחילה — ראי את ההוראות בחלק העליון');return null}
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
+    if(!res.ok){
+      let errMsg='שגיאה לא ידועה';
+      try{const err=await res.json();errMsg=err.error?.message||errMsg;}catch(e){}
+      if(res.status===401)errMsg='מפתח API שגוי — בדוק שהמפתח תקין';
+      else if(res.status===429)errMsg='חרגת ממגבלת הבקשות — נסה שוב בעוד דקה';
+      alert('שגיאה ('+res.status+'): '+errMsg);
+      return null;
+    }
+    const data=await res.json();
+    return data.choices[0].message.content;
+  }catch(e){
+    console.error('Groq fetch error:',e);
+    alert('שגיאת חיבור: '+e.message+'\n\nוודא שה-API Key תקין ושיש חיבור לאינטרנט.');
+    return null;
+  }
+}
+
+function loading(id){document.getElementById(id).innerHTML='<div class="ai-loading">השף חושב... רגע אחד</div>'}
+
+async function askChef(){
+  const ingList=ings.map(i=>(i.spoil?`[נפסד בקרוב] ${i.name}`:i.name)).join(', ');
+  const spoilList=ings.filter(i=>i.spoil).map(i=>i.name).join(', ');
+  const flavors=Array.from(document.querySelectorAll('#meal-flavors .sel')).map(e=>e.textContent).join(', ');
+  loading('chef-result');
+  const txt=await callAI(`אתה שף מומחה לשילובי טעמים. המשתמשת רוצה ${document.getElementById('meal-type').value}.
+חומרים זמינים: ${ingList||'לא צוינו — הצע לפי ידע כללי'}.
+${spoilList?`עדיפות לשימוש במרכיבים אלה שעומדים להיפסד: ${spoilList}.`:''}
+העדפות טעם: ${flavors||'ללא העדפה'}.
+מורכבות: ${document.getElementById('complexity').value}.
+הסבר בקצרה למה שילובי הטעמים עובדים.
+הצע 3 מנות מפורטות — שם, חומרים, הוראות קצרות (3-4 שלבים), ולמה הטעמים משתלבים.
+ענה בעברית. ללא asterisks.`);
+  if(txt)document.getElementById('chef-result').innerHTML=`<div class="result-box">${txt}</div>`;
+  else document.getElementById('chef-result').innerHTML='';
+}
+
+async function askActivities(){
+  loading('act-result');
+  const txt=await callAI(`אתה מומחית לחינוך ופעילויות יצירתיות לילדים.
+חומרים זמינים: ${actIngsList.join(', ')||'חומרים בסיסיים'}.
+גיל: ${document.getElementById('act-age').value}. זמן: ${document.getElementById('act-time').value}. בלאגן: ${document.getElementById('act-mess').value}. סוג: ${actCat==='all'?'כל סוג':actCat}.
+הצעי 4 פעילויות מפורטות ללא מסך עם מה שיש. לכל אחת: שם, מה צריך, הוראות קצרות, למה הילדים יאהבו.
+ענה בעברית. ללא asterisks.`);
+  if(txt)document.getElementById('act-result').innerHTML=`<div class="result-box">${txt}</div>`;
+  else document.getElementById('act-result').innerHTML='';
+}
+
+async function askEvening(){
+  loading('evening-result');
+  const txt=await callAI(`אתה מתכנן ערבי משפחה.
+חומרים: ${document.getElementById('ev-ings').value||'מה שיש בבית'}.
+גילאי ילדים: ${document.getElementById('ev-ages').value||'לא צוין'}.
+זמן: ${document.getElementById('ev-time').value}.
+צרי תוכנית ערב משפחתי שלמה:
+1. בישול/אפייה ביחד עם מתכון קצר
+2. משחק ללא מסך
+3. פעילות יצירה
+4. קינוח/סיום מתוק
+לכל פריט ציין זמן משוער. ענה בעברית. ללא asterisks.`);
+  if(txt)document.getElementById('evening-result').innerHTML=`<div class="result-box">${txt}</div>`;
+  else document.getElementById('evening-result').innerHTML='';
+}
+
+async function askWeek(){
+  loading('week-result');
+  const txt=await callAI(`אתה מומחית לפעילויות ילדים.
+גיל: ${document.getElementById('wk-age').value}. חומרים: ${document.getElementById('wk-ings').value||'חומרים בסיסיים'}.
+צרי לוח שבועי (ראשון–שבת) ללא מסכים.
+לכל יום: שם יום | פעילות עיקרית | פעילות בישול קצרה.
+ענה בעברית. ללא asterisks.`);
+  if(txt)document.getElementById('week-result').innerHTML=`<div class="result-box">${txt}</div>`;
+  else document.getElementById('week-result').innerHTML='';
+}
+
+const ACTIVITIES=[
+  {title:'ציור בצבעי מים',desc:'ציירו יחד על נייר גדול.',cat:'יצירה',age:'2-4'},
+  {title:'בצק מלח',desc:'קמח+מלח+מים = בצק לפיסול, אפייה וצביעה.',cat:'יצירה',age:'2-4'},
+  {title:'עוגיות בצורות',desc:'לגזור, לעצב, לאפות ולקשט.',cat:'בישול',age:'2-4'},
+  {title:'בנייה מקרטוניות',desc:'בנו עיר, מגדל, מכונית מקרטוניות.',cat:'יצירה',age:'4-7'},
+  {title:'ספר ילדים עצמי',desc:'מקפלים דפים לחוברת — ציור וסיפור ביד.',cat:'יצירה',age:'4-7'},
+  {title:'פיצה ביתית',desc:'כל ילד מסדר תוספות לבחירתו.',cat:'בישול',age:'4-7'},
+  {title:'ציד אוצרות',desc:'רמזים כתובים ואוצר מוסתר — שעה של ריצה.',cat:'משחק',age:'4-7'},
+  {title:'גינה בבקבוק',desc:'זרעים בבקבוק פלסטיק חצוי.',cat:'בחוץ',age:'4-7'},
+  {title:'עיתון משפחתי',desc:'כל אחד כותב/מצייר כתבה — מדפיסים.',cat:'יצירה',age:'7+'},
+  {title:'לחם בית',desc:'לשים, לעצב, לאפות.',cat:'בישול',age:'7+'},
+  {title:'רמי שולחן',desc:'ללמד ולשחק — מסורת משפחתית.',cat:'משחק',age:'7+'},
+  {title:'טיול משימות',desc:'5 משימות לחפש בחוץ: עלה, אבן, פרח.',cat:'בחוץ',age:'7+'},
+];
+
+function renderStaticActivities(){
+  const age=document.getElementById('act-age').value;
+  let list=ACTIVITIES;
+  if(actCat!=='all')list=list.filter(a=>a.cat===actCat);
+  if(age!=='all')list=list.filter(a=>a.age===age);
+  const catC={יצירה:'bp',בישול:'ba',משחק:'bt',בחוץ:'bc'};
+  document.getElementById('act-static-list').innerHTML=list.map(a=>`
+    <div class="activity-card">
+      <div style="margin-bottom:5px"><span class="badge ${catC[a.cat]||'bp'}">${a.cat}</span><span class="badge bg2">${a.age}</span></div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:3px">${a.title}</div>
+      <div style="font-size:13px;color:#666">${a.desc}</div>
+    </div>
+  `).join('')||'<div class="empty" style="grid-column:1/-1">לא נמצאו פעילויות</div>';
+}
+</script>
+</body>
+</html>
