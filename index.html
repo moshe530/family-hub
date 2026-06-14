@@ -199,18 +199,14 @@ function saveKey(){
   const k=document.getElementById('api-key-input').value.trim();
   if(!k){document.getElementById('key-status').textContent='הכניסי מפתח תחילה';return}
   localStorage.setItem('anthropic_key',k);
-  document.getElementById('key-status').textContent='נשמר בהצלחה!';
-  document.getElementById('api-banner').style.background='#EAF3DE';
-  document.getElementById('api-banner').style.borderColor='#97C459';
+  document.getElementById('api-banner').style.display='none';
 }
 
 window.onload=function(){
   const k=getKey();
   if(k){
     document.getElementById('api-key-input').value=k;
-    document.getElementById('key-status').textContent='מפתח שמור';
-    document.getElementById('api-banner').style.background='#EAF3DE';
-    document.getElementById('api-banner').style.borderColor='#97C459';
+    document.getElementById('api-banner').style.display='none';
   }
   loadRecipes();
   renderRecipes();
