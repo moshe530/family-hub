@@ -322,7 +322,7 @@ async function callAI(prompt){
   const key=getKey();
   if(!key){alert('צריך להזין API Key תחילה — ראי את ההוראות בחלק העליון');return null}
   try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
+    const res=await fetch('https://groq-proxy.c0583229580.workers.dev',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
     if(!res.ok){
       let errMsg='שגיאה לא ידועה';
       try{const err=await res.json();errMsg=err.error?.message||errMsg;}catch(e){}
